@@ -1,5 +1,6 @@
 package ru.kata.spring.boot_security.demo.hiber.service;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,27 +11,28 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-
 import ru.kata.spring.boot_security.demo.hiber.dao.UserRepository;
+import ru.kata.spring.boot_security.demo.hiber.model.Role;
 import ru.kata.spring.boot_security.demo.hiber.model.User;
 
 import javax.persistence.EntityNotFoundException;
-
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final SecurityUserService customUserDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
-                           SecurityUserService customUserDetailsService) {
+                           CustomUserDetailsService customUserDetailsService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.customUserDetailsService = customUserDetailsService;
@@ -38,8 +40,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void saveUser(User user) {
-        if (StringUtils.hasText(user.getPassword())) {
+    public void save(User user) {
+        if (!StringUtils.isEmpty(user.getPassword())) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         userRepository.save(user);
@@ -47,51 +49,58 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUser(User updatedUser) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
+    public void update(User user) {
+        Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
+        if (currentAuth == null || !currentAuth.isAuthenticated()) {
             throw new AccessDeniedException("User is not authenticated");
         }
-
-        User existingUser = userRepository.findById(updatedUser.getId())
+        boolean isAdmin = currentAuth.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+        User userInBase = getUserById(user.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        String oldName = userInBase.getName();
+        String oldPassword = userInBase.getPassword();
+        User currentUser = getUserByName(currentAuth.getName())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-        User currentUser = userRepository.findByName(auth.getName())
-                .orElseThrow(() -> new EntityNotFoundException("Current user not found"));
-
-        boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-
-        if (!isAdmin && !currentUser.getId().equals(existingUser.getId())) {
-            throw new AccessDeniedException("You cannot update another user's data");
+        if (!StringUtils.isEmpty(user.getName())) {
+            userInBase.setName(user.getName());
+        }
+        if (!StringUtils.isEmpty(user.getSex())) {
+            userInBase.setSex(user.getSex());
+        }
+        if (!StringUtils.isEmpty(user.getAge())) {
+            userInBase.setAge(user.getAge());
+        }
+        if (!StringUtils.isEmpty(user.getPassword())) {
+            userInBase.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
-        Optional.ofNullable(updatedUser.getName()).filter(StringUtils::hasText).ifPresent(existingUser::setName);
-        Optional.ofNullable(updatedUser.getSex()).filter(StringUtils::hasText).ifPresent(existingUser::setSex);
-        Optional.ofNullable(updatedUser.getAge()).ifPresent(existingUser::setAge);
-
-        if (StringUtils.hasText(updatedUser.getPassword())) {
-            existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        if (!StringUtils.isEmpty(user.getRoles()) && isAdmin) {
+            userInBase.setRoles(user.getRoles());
         }
-        if (isAdmin && updatedUser.getRoles() != null && !updatedUser.getRoles().isEmpty()) {
-            existingUser.setRoles(updatedUser.getRoles());
-        }
+        userRepository.save(userInBase);
 
-        userRepository.save(existingUser);
+        boolean isUpdateUsername = oldName.equals(currentAuth.getName())
+                && !oldName.equals(user.getName());
+        boolean isUpdatePassword = !StringUtils.isEmpty(user.getPassword())
+                && !passwordEncoder.matches(user.getPassword(), oldPassword);
 
-        if (currentUser.getId().equals(existingUser.getId())
-            && (!existingUser.getName().equals(auth.getName())
-                || StringUtils.hasText(updatedUser.getPassword()))) {
+        if (currentUser.getId().equals(user.getId()) && (isUpdateUsername || isUpdatePassword)) {
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(userInBase.getUsername());
 
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(existingUser.getUsername());
-            UsernamePasswordAuthenticationToken newAuth = new UsernamePasswordAuthenticationToken(
-                    userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+            UsernamePasswordAuthenticationToken newAuth =
+                    new UsernamePasswordAuthenticationToken(userDetails,
+                            userDetails.getPassword(),
+                            userDetails.getAuthorities());
+
             SecurityContextHolder.getContext().setAuthentication(newAuth);
         }
+
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public List<User> getAllUser() {
         return userRepository.findAll();
     }
 
@@ -107,10 +116,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteUser(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    public void delete(Long id) {
+        User user = getUserById(id).orElseThrow(EntityNotFoundException::new);
         user.getRoles().clear();
-        userRepository.delete(user);
+        userRepository.deleteById(id);
     }
 }

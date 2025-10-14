@@ -1,32 +1,31 @@
 package ru.kata.spring.boot_security.demo.controllers;
 
-import java.util.Optional;
+/*
+UserController предназначен для доступа пользователей с ролью ROLE_USER
+Пользователь может менять свои данные по желанию (кроме присвоенной роли)
+Пользователь НЕ может создавать, удалять, изменять новых или других user'ов
+*/
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
+import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.hiber.model.User;
 import ru.kata.spring.boot_security.demo.hiber.service.UserService;
+
+import java.util.Optional;
+import java.util.logging.Logger;
 
 @Controller
 @RequestMapping("/users")
 public class UserController {
 
+    private static final Logger LOGGER = Logger.getLogger(UserController.class.getName());
+
     @Autowired
     UserService userService;
-
-    @GetMapping("/")
-    public String userHome() {
-        return "redirect:/";
-    }
 
     @GetMapping("/info")
     public String userInfo(Model model) {
@@ -41,24 +40,27 @@ public class UserController {
             }
 
             model.addAttribute("user", user.get());
-            return "user/userinfo";
+            return "user/userInfo";
         }
         return "userNotFound";
     }
 
     @GetMapping("/update")
-    public String updateUserFrom(@RequestParam("id") Long id, Model model) {
+    public String updateUserForm(@RequestParam("id") Long id, Model model) {
         Optional<User> user = userService.getUserById(id);
         if (user.isEmpty()) {
-            return  "userNotFound";
+            LOGGER.warning(String.format("User id = {%d} not found", id));
+            return "userNotFound";
         }
         model.addAttribute("user", user.get());
-        return "user/userFrom";
+        return "user/userForm";
     }
 
     @PostMapping("/save")
     public String saveUser(@ModelAttribute("user") User user) {
-        userService.updateUser(user);
+        userService.update(user);
+        LOGGER.info("User update: " + user);
         return "redirect:/users/info";
     }
+
 }

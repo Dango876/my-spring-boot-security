@@ -1,20 +1,21 @@
 package ru.kata.spring.boot_security.demo.hiber.service;
 
-import java.util.List;
-import java.util.Optional;
 
 import ru.kata.spring.boot_security.demo.hiber.model.User;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface UserService {
-    void saveUser(User user);
+    void save(User user);
 
-    void updateUser(User user);
+    void update(User user);
 
-    List<User> getAllUsers();
+    List<User> getAllUser();
 
     Optional<User> getUserById(Long id);
 
     Optional<User> getUserByName(String name);
 
-    void deleteUser(Long id);
+    void delete(Long id);
 }

@@ -25,22 +25,24 @@ public class User implements UserDetails {
     private String sex;
 
     @Column(name = "age")
-    private int age;
+    private Integer age;
 
     @Column(name = "password")
     private String password;
 
-    @ManyToMany
-    @JoinTable(name = "user_roles",
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+    @JoinTable(
+            name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles;
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 
     public User() {
         this.roles = new HashSet<>();
     }
 
-    public User(String name, String sex, int age) {
+    public User(String name, String sex, Integer age) {
         this();
         this.name = name;
         this.sex = sex;
@@ -71,11 +73,11 @@ public class User implements UserDetails {
         this.sex = sex;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
@@ -138,11 +140,11 @@ public class User implements UserDetails {
     @Override
     public String toString() {
         return "User{" +
-               "id=" + id +
-               ", name='" + name + '\'' +
-               ", sex='" + sex + '\'' +
-               ", age=" + age +
-               ", password='" + password + '\'' +
-               '}';
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", sex='" + sex + '\'' +
+                ", age=" + age +
+                ", password='" + password + '\'' +
+                '}';
     }
 }

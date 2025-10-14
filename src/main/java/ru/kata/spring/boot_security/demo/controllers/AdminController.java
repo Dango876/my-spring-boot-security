@@ -1,26 +1,32 @@
 package ru.kata.spring.boot_security.demo.controllers;
 
-import java.security.Principal;
-import java.util.List;
-import java.util.Optional;
+/*
+AdminController предназначен для пользователей с ролью ROLE_ADMIN
+Админ может менять свои данные по желанию
+Админ может создавать, удалять, изменять новых или других user'ов
+*/
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
+import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.hiber.model.Role;
 import ru.kata.spring.boot_security.demo.hiber.model.User;
 import ru.kata.spring.boot_security.demo.hiber.service.RoleService;
 import ru.kata.spring.boot_security.demo.hiber.service.UserService;
+
+import java.security.Principal;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.logging.Logger;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
 
+    private static final Logger LOGGER = Logger.getLogger(AdminController.class.getName());
     private final UserService userService;
     private final RoleService roleService;
 
@@ -32,7 +38,7 @@ public class AdminController {
 
     @GetMapping("")
     public String allUser(Model model) {
-        List<User> userList = userService.getAllUsers();
+        List<User> userList = userService.getAllUser();
         model.addAttribute("userList", userList);
         if (userList.isEmpty()) {
             model.addAttribute("isEmpty", true);
@@ -47,37 +53,47 @@ public class AdminController {
             return "userNotFound";
         }
         model.addAttribute("user", user.get());
-        return "admin/userFrom";
+        return "admin/userInfo";
+    }
+
+    @GetMapping("/create")
+    public String createUserForm(Model model) {
+        model.addAttribute("user", new User());
+        model.addAttribute("roles", roleService.getAllRoles());
+        return "admin/userForm";
     }
 
     @GetMapping("/update")
-    public String updateUserFrom(@RequestParam("id") Long id, Model model) {
+    public String updateUserForm(@RequestParam("id") Long id, Model model) {
         Optional<User> user = userService.getUserById(id);
         if (user.isEmpty()) {
+            LOGGER.warning(String.format("User id = {%d} not found", id));
             return "userNotFound";
         }
         model.addAttribute("user", user.get());
         model.addAttribute("roles", roleService.getAllRoles());
-        return "admin/userFrom";
+        return "admin/userForm";
     }
 
-    @GetMapping("/save")
+    @PostMapping("/save")
     public String saveUser(@ModelAttribute("user") User user) {
+
         if (user.getId() == null) {
-            userService.saveUser(user);
+            userService.save(user);
+            LOGGER.info("User create: " + user);
         } else {
-            userService.updateUser(user);
+            userService.update(user);
+            LOGGER.info("User update: " + user);
         }
+
         return "redirect:/admin";
     }
 
     @PostMapping("/delete")
     public String deleteUser(@RequestParam("id") Long id, Principal principal) {
-        User userInSession = userService.getUserByName(principal.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        userService.deleteUser(id);
-
+        User userInSession = userService.getUserByName(principal.getName()).orElseThrow();
+        userService.delete(id);
+        LOGGER.info(String.format("User with id = {%d} was deleted", id));
         if (userInSession.getId().equals(id)) {
             return "redirect:/login";
         }
