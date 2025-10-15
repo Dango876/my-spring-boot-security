@@ -1,28 +1,22 @@
-package ru.kata.spring.boot_security.demo.configs;
+package ru.kata.spring.boot_security.demo.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import ru.kata.spring.boot_security.demo.hiber.model.Role;
-import ru.kata.spring.boot_security.demo.hiber.model.User;
-import ru.kata.spring.boot_security.demo.hiber.service.RoleService;
-import ru.kata.spring.boot_security.demo.hiber.service.RoleServiceImpl;
-import ru.kata.spring.boot_security.demo.hiber.service.UserService;
-
-import java.util.logging.Logger;
+import ru.kata.spring.boot_security.demo.model.Role;
+import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.service.RoleService;
+import ru.kata.spring.boot_security.demo.service.UserService;
 
 @Component
-public class DataInitializer implements ApplicationRunner {
+public class UserDataInitializer implements ApplicationRunner {
 
     private final UserService userService;
     private final RoleService roleService;
 
-    private static final Logger LOGGER = Logger.getLogger(DataInitializer.class.getName());
-
     @Autowired
-    public DataInitializer(UserService userService, RoleService roleService) {
+    public UserDataInitializer(UserService userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
     }
@@ -37,13 +31,12 @@ public class DataInitializer implements ApplicationRunner {
             Role adminRole = roleService.getRoleByName("ROLE_ADMIN")
                     .orElseGet(() -> {
                         Role role = new Role("ROLE_ADMIN");
-                        roleService.save(role);
+                        roleService.saveRole(role);
                         return role;
                     });
             admin.getRoles().add(adminRole);
 
-            userService.save(admin);
-            LOGGER.info("Admin created.");
+            userService.saveUser(admin);
         }
 
         if (userService.getUserByName("user").isEmpty()) {
@@ -54,13 +47,12 @@ public class DataInitializer implements ApplicationRunner {
             Role userRole = roleService.getRoleByName("ROLE_USER")
                     .orElseGet(() -> {
                         Role role = new Role("ROLE_USER");
-                        roleService.save(role);
+                        roleService.saveRole(role);
                         return role;
                     });
             user.getRoles().add(userRole);
 
-            userService.save(user);
-            LOGGER.info("User created.");
+            userService.saveUser(user);
         }
     }
 }

@@ -1,4 +1,4 @@
-package ru.kata.spring.boot_security.demo.hiber.service;
+package ru.kata.spring.boot_security.demo.service;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,28 +11,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import ru.kata.spring.boot_security.demo.hiber.dao.UserRepository;
-import ru.kata.spring.boot_security.demo.hiber.model.Role;
-import ru.kata.spring.boot_security.demo.hiber.model.User;
+import ru.kata.spring.boot_security.demo.dao.UserRepository;
+import ru.kata.spring.boot_security.demo.model.User;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserDetailsService customUserDetailsService;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
-                           CustomUserDetailsService customUserDetailsService) {
+                           UserDetailsService customUserDetailsService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.customUserDetailsService = customUserDetailsService;
@@ -40,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void save(User user) {
+    public void saveUser(User user) {
         if (!StringUtils.isEmpty(user.getPassword())) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
@@ -49,7 +45,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void update(User user) {
+    public void updateUser(User user) {
         Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
         if (currentAuth == null || !currentAuth.isAuthenticated()) {
             throw new AccessDeniedException("User is not authenticated");
@@ -66,8 +62,8 @@ public class UserServiceImpl implements UserService {
         if (!StringUtils.isEmpty(user.getName())) {
             userInBase.setName(user.getName());
         }
-        if (!StringUtils.isEmpty(user.getSex())) {
-            userInBase.setSex(user.getSex());
+        if (!StringUtils.isEmpty(user.getFloor())) {
+            userInBase.setFloor(user.getFloor());
         }
         if (!StringUtils.isEmpty(user.getAge())) {
             userInBase.setAge(user.getAge());
@@ -96,11 +92,10 @@ public class UserServiceImpl implements UserService {
 
             SecurityContextHolder.getContext().setAuthentication(newAuth);
         }
-
     }
 
     @Override
-    public List<User> getAllUser() {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
@@ -116,7 +111,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void delete(Long id) {
+    public void deleteUser(Long id) {
         User user = getUserById(id).orElseThrow(EntityNotFoundException::new);
         user.getRoles().clear();
         userRepository.deleteById(id);

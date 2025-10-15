@@ -1,4 +1,4 @@
-package ru.kata.spring.boot_security.demo.hiber.model;
+package ru.kata.spring.boot_security.demo.model;
 
 
 import org.springframework.security.core.GrantedAuthority;
@@ -21,8 +21,8 @@ public class User implements UserDetails {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "sex")
-    private String sex;
+    @Column(name = "floor")
+    private String floor;
 
     @Column(name = "age")
     private Integer age;
@@ -42,10 +42,10 @@ public class User implements UserDetails {
         this.roles = new HashSet<>();
     }
 
-    public User(String name, String sex, Integer age) {
+    public User(String name, String floor, Integer age) {
         this();
         this.name = name;
-        this.sex = sex;
+        this.floor = floor;
         this.age = age;
     }
 
@@ -65,12 +65,12 @@ public class User implements UserDetails {
         this.name = name;
     }
 
-    public String getSex() {
-        return sex;
+    public String getFloor() {
+        return floor;
     }
 
-    public void setSex(String sex) {
-        this.sex = sex;
+    public void setFloor(String floor) {
+        this.floor = floor;
     }
 
     public Integer getAge() {
@@ -142,7 +142,7 @@ public class User implements UserDetails {
         return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", sex='" + sex + '\'' +
+                ", floor='" + floor + '\'' +
                 ", age=" + age +
                 ", password='" + password + '\'' +
                 '}';

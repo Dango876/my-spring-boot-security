@@ -1,10 +1,4 @@
-package ru.kata.spring.boot_security.demo.controllers;
-
-/*
-UserController предназначен для доступа пользователей с ролью ROLE_USER
-Пользователь может менять свои данные по желанию (кроме присвоенной роли)
-Пользователь НЕ может создавать, удалять, изменять новых или других user'ов
-*/
+package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,17 +6,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import ru.kata.spring.boot_security.demo.hiber.model.User;
-import ru.kata.spring.boot_security.demo.hiber.service.UserService;
+import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.service.UserService;
 
 import java.util.Optional;
-import java.util.logging.Logger;
 
 @Controller
 @RequestMapping("/users")
 public class UserController {
-
-    private static final Logger LOGGER = Logger.getLogger(UserController.class.getName());
 
     @Autowired
     UserService userService;
@@ -49,7 +40,6 @@ public class UserController {
     public String updateUserForm(@RequestParam("id") Long id, Model model) {
         Optional<User> user = userService.getUserById(id);
         if (user.isEmpty()) {
-            LOGGER.warning(String.format("User id = {%d} not found", id));
             return "userNotFound";
         }
         model.addAttribute("user", user.get());
@@ -58,8 +48,7 @@ public class UserController {
 
     @PostMapping("/save")
     public String saveUser(@ModelAttribute("user") User user) {
-        userService.update(user);
-        LOGGER.info("User update: " + user);
+        userService.updateUser(user);
         return "redirect:/users/info";
     }
 

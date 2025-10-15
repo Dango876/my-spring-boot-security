@@ -1,9 +1,9 @@
-package ru.kata.spring.boot_security.demo.hiber.service;
+package ru.kata.spring.boot_security.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.kata.spring.boot_security.demo.hiber.dao.RoleRepository;
-import ru.kata.spring.boot_security.demo.hiber.model.Role;
+import ru.kata.spring.boot_security.demo.dao.RoleRepository;
+import ru.kata.spring.boot_security.demo.model.Role;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +29,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public void save(Role role) {
+    public void saveRole(Role role) {
         roleRepository.save(role);
     }
 }

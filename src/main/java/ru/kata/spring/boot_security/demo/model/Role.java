@@ -1,4 +1,4 @@
-package ru.kata.spring.boot_security.demo.hiber.model;
+package ru.kata.spring.boot_security.demo.model;
 
 import org.springframework.security.core.GrantedAuthority;
 
@@ -18,8 +18,7 @@ public class Role implements GrantedAuthority {
     @ManyToMany(mappedBy = "roles")
     private List<User> users;
 
-    public Role() {
-    }
+    public Role() { }
 
     public Role(String name) {
         this.name = name;
