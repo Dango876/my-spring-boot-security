@@ -26,7 +26,7 @@ public class AdminController {
     }
 
     @GetMapping("")
-    public String allUser(Model model) {
+    public String getAllUser(Model model) {
         List<User> userList = userService.getAllUsers();
         model.addAttribute("userList", userList);
         if (userList.isEmpty()) {
@@ -36,7 +36,7 @@ public class AdminController {
     }
 
     @GetMapping("/info")
-    public String userInfo(@RequestParam("id") Long id, Model model) {
+    public String getUserInfo(@RequestParam("id") Long id, Model model) {
         Optional<User> user = userService.getUserById(id);
         if (user.isEmpty()) {
             return "userNotFound";
