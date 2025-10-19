@@ -5,29 +5,29 @@
     <title>User Info</title>
 </head>
 <body>
-    <h1>Информация о пользователе</h1>
+<h1>Информация о пользователе</h1>
 
-    <div>
-        <ul>
-            <li>
-                <strong>Имя:</strong> <span th:text="${user.name}">Name</span><br>
-                <strong>Пол:</strong> <span th:text="${user.floor}">Floor</span><br>
-                <strong>Возраст:</strong> <span th:text="${user.age}">Age</span><br>
-               <hr>
-            </li>
-        </ul>
-    </div>
-    <div>
-        <form th:action="@{/users/update}" method="get">
-            <input type="hidden" th:field="${user.id}" />
-            <button type="submit">Изменить</button>
-        </form>
-    </div>
+<div>
+    <ul>
+        <li>
+            <strong>Имя:</strong> <span th:text="${user.name}">Name</span><br>
+            <strong>Пол:</strong> <span th:text="${user.floor}">Floor</span><br>
+            <strong>Возраст:</strong> <span th:text="${user.age}">Age</span><br>
+            <hr>
+        </li>
+    </ul>
+</div>
+<div>
+    <form th:action="@{/users/update(id=${user.id})}" method="get">
+        <input type="hidden" name="id" th:value="${user.id}" />
+        <button type="submit">Изменить</button>
+    </form>
+</div>
 
-    <div>
-        <form th:action="@{/logout}" method="post">
-            <button type="submit">Выйти</button>
-        </form>
-    </div>
+<div>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Выйти</button>
+    </form>
+</div>
 </body>
 </html>

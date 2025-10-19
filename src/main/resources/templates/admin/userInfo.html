@@ -5,42 +5,43 @@
     <title>User Info</title>
 </head>
 <body>
-    <h1>Информация о пользователе</h1>
+<h1>Информация о пользователе</h1>
 
-    <div>
-        <ul>
-            <li>
-                <strong>Имя:</strong> <span th:text="${user.name}">Name</span><br>
-                <strong>Пол:</strong> <span th:text="${user.floor}">Floor</span><br>
-                <strong>Возраст:</strong> <span th:text="${user.age}">Age</span><br>
-                <strong>Роль:</strong> <span th:text="${#strings.listJoin(user.rolesAsString, ', ')}">Role</span><br>
-                <hr>
-            </li>
-        </ul>
-    </div>
-    <div>
-        <form th:action="@{/admin/update}" method="get">
-            <input type="hidden" th:field="${user.id}" />
-            <button type="submit">Изменить</button>
-        </form>
-    </div>
-    <div>
-        <form th:action="@{/admin/delete}" method="post">
-            <input type="hidden" th:field="${user.id}" />
-            <button type="submit">Удалить</button>
-        </form>
-    </div>
+<div>
+    <ul>
+        <li>
+            <strong>Имя:</strong> <span th:text="${user.name}">Name</span><br>
+            <strong>Пол:</strong> <span th:text="${user.floor}">Floor</span><br>
+            <strong>Возраст:</strong> <span th:text="${user.age}">Age</span><br>
+            <strong>Роль:</strong> <span th:text="${#strings.listJoin(user.rolesAsString, ', ')}">Role</span><br>
+            <hr>
+        </li>
+    </ul>
+</div>
+<div>
+    <form th:action="@{/admin/update(id=${user.id})}" method="get">
+        <input type="hidden" name="id" th:value="${user.id}" />
+        <button type="submit">Изменить</button>
+    </form>
+</div>
+<div>
+    <form th:action="@{/admin/delete(id=${user.id})}" method="post">
+        <input type="hidden" name="id" th:value="${user.id}" />
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit">Удалить</button>
+    </form>
+</div>
 
-    <div>
-        <form th:action="@{/admin}" method="get">
-            <button type="submit">Все пользователи</button>
-        </form>
-    </div>
+<div>
+    <form th:action="@{/admin}" method="get">
+        <button type="submit">Все пользователи</button>
+    </form>
+</div>
 
-    <div>
-        <form th:action="@{/logout}" method="post">
-            <button type="submit">Выйти</button>
-        </form>
-    </div>
+<div>
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Выйти</button>
+    </form>
+</div>
 </body>
 </html>
