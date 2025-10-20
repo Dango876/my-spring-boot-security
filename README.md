@@ -1,6 +1,6 @@
-1. userInSession - не нужен он в контроллере на удаление пользователя
+1. userInSession - не нужен он в контроллере на удаление пользователя - Corrected
 2. UserController - не должно быть адмниских функций - Corrected
-3. public void updateUser - сократить
+3. public void updateUser - сократить - Corrected
 4. 
 5. нет секьюрности на user/** - Corrected
 6. .antMatchers("/").permitAll() - сначала самые сильные проверки должны быть, потом самые слабые - Corrected
