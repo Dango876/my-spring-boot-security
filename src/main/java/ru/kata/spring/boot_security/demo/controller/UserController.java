@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.entity.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
-import javax.persistence.EntityNotFoundException;
 import java.security.Principal;
 
 @Controller
@@ -27,32 +26,17 @@ public class UserController {
     }
 
     @GetMapping("/update")
-    public String updateUserForm(@RequestParam("id") Long id, Model model, Principal principal) {
-        try {
-            User currentUser = userService.getUserByName(principal.getName());
-            if (!currentUser.getId().equals(id)) {
-                return "accessDenied";
-            }
-
-            User user = userService.getUserById(id);
-            model.addAttribute("user", user);
-            return "user/userForm";
-        } catch (EntityNotFoundException e) {
-            return "userNotFound";
-        }
+    public String updateUserForm(Model model, Principal principal) {
+        User user = userService.getUserByName(principal.getName());
+        model.addAttribute("user", user);
+        return "user/userForm";
     }
 
     @PostMapping("/update")
     public String saveUser(@ModelAttribute("user") User user, Principal principal) {
-        try {
-            User currentUser = userService.getUserByName(principal.getName());
-            if (!currentUser.getId().equals(user.getId())) {
-                return "accessDenied";
-            }
-            userService.updateUser(user);
-            return "redirect:/users/info";
-        } catch (EntityNotFoundException e) {
-            return "userNotFound";
-        }
+        User currentUser = userService.getUserByName(principal.getName());
+        user.setId(currentUser.getId());
+        userService.updateUser(user);
+        return "redirect:/users/info";
     }
 }

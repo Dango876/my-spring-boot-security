@@ -75,13 +75,9 @@ public class AdminController {
     }
 
     @PostMapping("/delete")
-    public String deleteUser(@RequestParam("id") Long id, Principal principal) {
+    public String deleteUser(@RequestParam("id") Long id) {
         try {
-            User userInSession = userService.getUserByName(principal.getName());
             userService.deleteUser(id);
-            if (userInSession.getId().equals(id)) {
-                return "redirect:/login";
-            }
             return "redirect:/admin";
         } catch (EntityNotFoundException e) {
             return "redirect:/admin";
