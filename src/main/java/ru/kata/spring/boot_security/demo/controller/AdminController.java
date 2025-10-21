@@ -6,9 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.entity.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
-
-import javax.persistence.EntityNotFoundException;
-import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -23,7 +20,7 @@ public class AdminController {
     }
 
     @GetMapping()
-    public String getAllUser(Model model) {
+    public String showAllUsers(Model model) {
         List<User> userList = userService.getAllUsers();
         model.addAttribute("userList", userList);
         if (userList.isEmpty()) {
@@ -33,33 +30,25 @@ public class AdminController {
     }
 
     @GetMapping("/info")
-    public String getUserInfo(@RequestParam("id") Long id, Model model) {
-        try {
+    public String showUserInfo(@RequestParam("id") Long id, Model model) {
             User user = userService.getUserById(id);
             model.addAttribute("user", user);
             return "admin/userInfo";
-        } catch (EntityNotFoundException e) {
-            return "userNotFound";
-        }
     }
 
     @GetMapping("/create")
-    public String createUserForm(Model model) {
+    public String showCreateUserForm(Model model) {
         model.addAttribute("user", new User());
         model.addAttribute("roles", roleService.getAllRoles());
         return "admin/userForm";
     }
 
     @GetMapping("/update")
-    public String updateUserForm(@RequestParam("id") Long id, Model model) {
-        try {
+    public String showUpdateUserForm(@RequestParam("id") Long id, Model model) {
             User user = userService.getUserById(id);
             model.addAttribute("user", user);
             model.addAttribute("roles", roleService.getAllRoles());
             return "admin/userForm";
-        } catch (EntityNotFoundException e) {
-            return "userNotFound";
-        }
     }
 
     @PostMapping("/create")
@@ -76,11 +65,7 @@ public class AdminController {
 
     @PostMapping("/delete")
     public String deleteUser(@RequestParam("id") Long id) {
-        try {
-            userService.deleteUser(id);
-            return "redirect:/admin";
-        } catch (EntityNotFoundException e) {
-            return "redirect:/admin";
-        }
+        userService.deleteUser(id);
+        return "redirect:/admin";
     }
 }

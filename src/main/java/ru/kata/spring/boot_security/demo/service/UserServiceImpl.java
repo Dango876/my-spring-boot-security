@@ -36,6 +36,10 @@ public class UserServiceImpl implements UserService {
     public void updateUser(User user) {
         User userInBase = getUserById(user.getId());
 
+        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+//            userInBase.setRoles(user.getRoles());
+        }
+
         if (!StringUtils.isEmpty(user.getName())) {
             userInBase.setName(user.getName());
         }
@@ -48,10 +52,6 @@ public class UserServiceImpl implements UserService {
         if (!StringUtils.isEmpty(user.getPassword())) {
             userInBase.setPassword(passwordEncoder.encode(user.getPassword()));
         }
-        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
-            userInBase.setRoles(user.getRoles());
-        }
-
         userRepository.save(userInBase);
     }
 
