@@ -22,19 +22,4 @@ public class UserController {
         model.addAttribute("user", user);
         return "user/userInfo";
     }
-
-    @GetMapping("/update")
-    public String showUpdateUserForm(Model model, Principal principal) {
-        User user = userService.getUserByName(principal.getName());
-        model.addAttribute("user", user);
-        return "user/userForm";
-    }
-
-    @PostMapping("/update")
-    public String updateUser(@ModelAttribute("user") User user, Principal principal) {
-        User currentUser = userService.getUserByName(principal.getName());
-        user.setId(currentUser.getId());
-        userService.updateUser(user);
-        return "redirect:/users/info";
-    }
 }

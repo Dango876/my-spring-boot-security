@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
         User userInBase = getUserById(user.getId());
 
         if (user.getRoles() != null && !user.getRoles().isEmpty()) {
-//            userInBase.setRoles(user.getRoles());
+            userInBase.setRoles(user.getRoles());
         }
 
         if (!StringUtils.isEmpty(user.getName())) {
@@ -75,8 +75,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteUser(Long id) {
-        User user = getUserById(id);
-        user.getRoles().clear();
         userRepository.deleteById(id);
     }
 }

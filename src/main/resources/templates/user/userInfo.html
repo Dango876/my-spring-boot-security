@@ -17,12 +17,6 @@
         </li>
     </ul>
 </div>
-<div>
-    <form th:action="@{/users/update(id=${user.id})}" method="get">
-        <input type="hidden" name="id" th:value="${user.id}" />
-        <button type="submit">Изменить</button>
-    </form>
-</div>
 
 <div>
     <form th:action="@{/logout}" method="post">
